@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { User } from '../auth/user.entity'; // Asegúrate de que la ruta es correcta
+import { User } from '../auth/user.entity'; 
 
 export enum TaskStatus {
   PENDING = 'PENDING',

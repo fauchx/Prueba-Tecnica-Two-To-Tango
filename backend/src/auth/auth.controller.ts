@@ -8,7 +8,7 @@ export class AuthController {
 
   @Post('/register')
   async register(@Body() createUserDto: CreateUserDto): Promise<void> {
-    await this.authService.register(createUserDto); // Se pasa un solo argumento (createUserDto)
+    await this.authService.register(createUserDto); 
   }
 
   @Post('/login')

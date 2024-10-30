@@ -8,9 +8,9 @@ import { User } from './user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),  // Agrega el repositorio de User directamente
+    TypeOrmModule.forFeature([User]),  
     JwtModule.register({
-      secret: 'yourSecretKey',         // Clave secreta
+      secret: 'yourSecretKey',         
       signOptions: { expiresIn: '1h' },
     }),
   ],
