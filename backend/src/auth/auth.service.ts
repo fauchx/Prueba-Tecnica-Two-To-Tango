@@ -1,54 +1,35 @@
-// auth.service.ts
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from './create-user.dto';
-import { User } from './user.entity'; // Asegúrate de que User tenga solo las propiedades necesarias
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { User } from './user.entity';
+import { CreateUserDto } from './create-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly jwtService: JwtService,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>, // Inyecta el repositorio de User
+    private readonly usersRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<void> {
+  async register(createUserDto: CreateUserDto): Promise<User> {
     const { username, password } = createUserDto;
 
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Guardar el nuevo usuario en la base de datos
-    const user = new User();
-    user.username = username; // Asegúrate de que 'username' sea una propiedad de User
-    user.password = hashedPassword; // Asegúrate de que 'password' sea una propiedad de User
-
-    await this.userRepository.save(user); // Guarda el usuario en la base de datos
+    const user = this.usersRepository.create({ username, password });
+    await this.usersRepository.save(user);
+    return user;
   }
 
   async login(username: string, password: string): Promise<{ accessToken: string }> {
-    // Buscar el usuario en tu base de datos
-    const user = await this.findUserByUsername(username);
+    const user = await this.usersRepository.findOne({ where: { username, password } });
+    
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new UnauthorizedException('Credenciales incorrectas');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error('Contraseña incorrecta');
-    }
-
-    // Generar el token JWT
     const payload = { username: user.username, sub: user.id };
     const accessToken = this.jwtService.sign(payload);
-
     return { accessToken };
-  }
-
-  private async findUserByUsername(username: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { username } }); // Busca el usuario por su nombre de usuario
   }
 }

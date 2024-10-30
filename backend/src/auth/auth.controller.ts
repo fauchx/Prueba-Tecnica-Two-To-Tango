@@ -1,21 +1,21 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './create-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
+  @Post('/register')
   async register(@Body() createUserDto: CreateUserDto): Promise<void> {
-    const { username, password } = createUserDto; // Desestructuramos para obtener los valores
-    await this.authService.register(createUserDto);
+    await this.authService.register(createUserDto); // Se pasa un solo argumento (createUserDto)
   }
 
-  // Aquí puedes agregar otros métodos, como login
-  @Post('login')
-  async login(@Body() createUserDto: CreateUserDto): Promise<{ accessToken: string }> {
-    const { username, password } = createUserDto;
+  @Post('/login')
+  async login(
+    @Body('username') username: string,
+    @Body('password') password: string,
+  ): Promise<{ accessToken: string }> {
     return await this.authService.login(username, password);
   }
 }

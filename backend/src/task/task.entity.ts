@@ -28,6 +28,6 @@ export class Task {
   })
   status: TaskStatus;
 
-  @ManyToOne(() => User, (user) => user.tasks) // Asegúrate de que la relación está bien definida
+  @ManyToOne(() => User, (user) => user.tasks) 
   user: User;
 }

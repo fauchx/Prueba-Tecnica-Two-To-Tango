@@ -1,31 +1,36 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './create-task.dto';
 import { Task } from './task.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // Asegúrate de que la ruta es correcta
+import { User } from '../auth/user.entity';
+import { TaskStatus } from './task.entity';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllTasks(@Request() req): Promise<Task[]> {
-    const user = req.user; // Asegúrate de que estás obteniendo el usuario autenticado
+  getTasks(user: User): Promise<Task[]> {
     return this.tasksService.getTasks(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  getTaskById(@Param('id') id: number, user: User): Promise<Task> {
+    return this.tasksService.getTaskById(id, user);
+  }
+
   @Post()
-  async createTask(@Body() createTaskDto: CreateTaskDto, @Request() req): Promise<Task> {
-    const user = req.user; // Asegúrate de que estás obteniendo el usuario autenticado
+  createTask(@Body() createTaskDto: CreateTaskDto, user: User): Promise<Task> {
     return this.tasksService.createTask(createTaskDto, user);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async getTaskById(@Param('id') id: number, @Request() req): Promise<Task> {
-    const user = req.user; // Asegúrate de que estás obteniendo el usuario autenticado
-    return this.tasksService.getTaskById(id, user);
+  @Patch('/:id/status')
+  updateTaskStatus(@Param('id') id: number, @Body('status') status: TaskStatus, user: User): Promise<Task> {
+    return this.tasksService.updateTask(id, status, user);
+  }
+
+  @Delete('/:id')
+  deleteTask(@Param('id') id: number, user: User): Promise<void> {
+    return this.tasksService.deleteTask(id, user);
   }
 }
